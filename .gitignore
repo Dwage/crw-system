@@ -1,0 +1,10 @@
+/bin
+/nginx
+/obj
+/Pages
+/Properties
+/wwwroot
+
+/[build
+/[final
+/api_test.http

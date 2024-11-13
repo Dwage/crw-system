@@ -1,26 +1,28 @@
-CREATE OR REPLACE FUNCTION check_salary_minimum()
+CREATE OR REPLACE FUNCTION delete_car_repairs_cascade()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW."Position" = 'Должность 1' AND NEW."Salary" < 20000 THEN
-        RAISE EXCEPTION 'Зарплата сотрудника ниже минимально допустимой для Должности 1 (20,000)';
-    ELSIF NEW."Position" = 'Должность 2' AND NEW."Salary" < 25000 THEN
-        RAISE EXCEPTION 'Зарплата сотрудника ниже минимально допустимой для Должности 2 (30,000)';
-    ELSIF NEW."Position" = 'Должность 3' AND NEW."Salary" < 30000 THEN
-        RAISE EXCEPTION 'Зарплата сотрудника ниже минимально допустимой для Должности 3 (40,000)';
-    ELSIF NEW."Position" = 'Должность 4' AND NEW."Salary" < 35000 THEN
-        RAISE EXCEPTION 'Зарплата сотрудника ниже минимально допустимой для Должности 4 (50,000)';
-    ELSIF NEW."Position" = 'Должность 5' AND NEW."Salary" < 40000 THEN
-        RAISE EXCEPTION 'Зарплата сотрудника ниже минимально допустимой для Должности 5 (60,000)';
-    END IF;
-
-    RETURN NEW;
+    DELETE FROM "CarRepairs" WHERE "CarId" = OLD."CarId";
+    RETURN OLD;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_check_salary_minimum
-BEFORE INSERT OR UPDATE ON "Staff"
+CREATE TRIGGER trigger_delete_car_repairs_cascade
+AFTER DELETE ON "Cars"
 FOR EACH ROW
-EXECUTE FUNCTION check_salary_minimum();
+EXECUTE FUNCTION delete_car_repairs_cascade();
+
+CREATE OR REPLACE FUNCTION delete_spare_parts_for_malfunction()
+RETURNS TRIGGER AS $$
+BEGIN
+    DELETE FROM "SpareParts" WHERE "MalfunctionId" = OLD."MalfunctionId";
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_delete_spare_parts_for_malfunction
+AFTER DELETE ON "Malfunctions"
+FOR EACH ROW
+EXECUTE FUNCTION delete_spare_parts_for_malfunction();
 
 CREATE OR REPLACE FUNCTION prevent_absolute_duplicates()
 RETURNS TRIGGER AS $$
